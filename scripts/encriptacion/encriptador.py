@@ -2,8 +2,8 @@ import numpy as np
 import random
 
 
-def getGrillEncryptor():
-    nxC,nyC = 25, 25
+def getGrillEncryptor(tam_x, tam_y):
+    nxC,nyC = tam_x,tam_y
 
     gameState = np.zeros((nxC, nyC))
 
@@ -72,6 +72,3 @@ def getGrillEncryptor():
 
         epocs -= 1
     return gameState
-
-grillEncryptor = getGrillEncryptor()
-print(grillEncryptor)
