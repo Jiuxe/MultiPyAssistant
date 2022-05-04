@@ -23,12 +23,14 @@ def encrypt_img():
         tam_x = 10
         tam_y = 10
 
-        grillEncrypt = encriptador.getGrillEncryptor(tam_x, tam_y)
+        grillEncrypt, inital_key = encriptador.getGrillEncryptor(tam_x, tam_y)
 
         apply_encrypt(imagen, grillEncrypt)
 
         imagen_des = np.copy(imagen)
-        apply_desencrypt(imagen_des, grillEncrypt)
+
+        grillDecrypt = encriptador.getGrillDecryptor(inital_key)
+        apply_decrypt(imagen_des, grillDecrypt)
 
         result_image = np.concatenate((imagen, imagen_des), axis=1)
 
@@ -59,7 +61,7 @@ def apply_encrypt(img, grill):
             img[i][j][1] = img[i][j][1] % 256
             img[i][j][2] = img[i][j][2] % 256
 
-def apply_desencrypt(img, grill):
+def apply_decrypt(img, grill):
 
     img_size_x = len(img[0])
     img_size_y = len(img)
@@ -87,8 +89,8 @@ button1.place(x=155, y=60)
 
 root.geometry("500x300")
 root.mainloop()
-"""
 
+"""""
 matriz_basica = [[[1,255,1],[2,225,2],[3,3,3]]
                 ,[[4,4,4],[5,25,5],[6,6,255]]
                 ,[[7,7,7],[8,25,28],[39,9,49]]]
@@ -102,4 +104,5 @@ print("Despues de encriptar:", matriz_basica)
 
 apply_desencrypt(matriz_basica, grill_basic)
 print("Despues de desencriptar:", matriz_basica)
-"""
+"""""
+
