@@ -1,7 +1,9 @@
+from logging import exception
 from tkinter import *
 from tkinter import filedialog as fd
 from tkinter import messagebox as mb
 import cv2
+import numpy as np
 import encriptador
 
 #Para ver el progreso de encriptacion
@@ -25,18 +27,20 @@ def encrypt_img():
 
         apply_encrypt(imagen, grillEncrypt)
 
-        cv2.imshow('', imagen)
+        imagen_des = np.copy(imagen)
+        apply_desencrypt(imagen_des, grillEncrypt)
+
+        result_image = np.concatenate((imagen, imagen_des), axis=1)
+
+        cv2.imshow('', result_image)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
-    except:
-        mb.showerror("Error", "Problema al realizar encriptacion")
+    except exception as e:
+        mb.showerror("Error", "Problema al realizar encriptacion" + e)
         return
 
 
 def apply_encrypt(img, grill):
-
-    center_grill_x = len(grill[0]) // 2
-    center_grill_y = len(grill) // 2
 
     img_size_x = len(img[0])
     img_size_y = len(img)
@@ -45,10 +49,33 @@ def apply_encrypt(img, grill):
         for j in range(img_size_x):
             for i_grill in range(len(grill)):
                 for j_grill in range(len(grill[0])):
-                   img[i][j][0] += img[(i+i_grill)%img_size_y][(j+j_grill)%img_size_x][0] * grill[i_grill][j_grill]
-                   img[i][j][1] += img[(i+i_grill)%img_size_y][(j+j_grill)%img_size_x][1] * grill[i_grill][j_grill]
-                   img[i][j][2] += img[(i+i_grill)%img_size_y][(j+j_grill)%img_size_x][2] * grill[i_grill][j_grill]
+                   if (i != (i + i_grill) % img_size_y and j != (j + j_grill) % img_size_x):
+                    img[i][j][0] = img[i][j][0] + img[(i+i_grill)%img_size_y][(j+j_grill)%img_size_x][0] * grill[i_grill][j_grill]
+                    img[i][j][1] = img[i][j][1] + img[(i+i_grill)%img_size_y][(j+j_grill)%img_size_x][1] * grill[i_grill][j_grill]
+                    img[i][j][2] = img[i][j][2] + img[(i+i_grill)%img_size_y][(j+j_grill)%img_size_x][2] * grill[i_grill][j_grill]
+                    # img[i][j] = img[i][j] + img[(i+i_grill)%img_size_y][(j+j_grill)%img_size_x] * grill[i_grill][j_grill]
 
+            img[i][j][0] = img[i][j][0] % 256
+            img[i][j][1] = img[i][j][1] % 256
+            img[i][j][2] = img[i][j][2] % 256
+
+def apply_desencrypt(img, grill):
+
+    img_size_x = len(img[0])
+    img_size_y = len(img)
+
+    for i in tqdm(range(img_size_y-1, -1, -1)):
+        for j in range(img_size_x-1, -1, -1):
+            for i_grill in range(len(grill)-1, -1, -1):
+                for j_grill in range(len(grill[0])-1, -1, -1):
+                   if(i != (i+i_grill)%img_size_y and j != (j+j_grill)%img_size_x):
+                    img[i][j][0] = img[i][j][0] - img[(i+i_grill)%img_size_y][(j+j_grill)%img_size_x][0] * grill[i_grill][j_grill]
+                    img[i][j][1] = img[i][j][1] - img[(i+i_grill)%img_size_y][(j+j_grill)%img_size_x][1] * grill[i_grill][j_grill]
+                    img[i][j][2] = img[i][j][2] - img[(i+i_grill)%img_size_y][(j+j_grill)%img_size_x][2] * grill[i_grill][j_grill]
+                    #img[i][j] =  img[i][j] - img[(i+i_grill)%img_size_y][(j+j_grill)%img_size_x] * grill[i_grill][j_grill]
+            img[i][j][0] = img[i][j][0] % 256
+            img[i][j][1] = img[i][j][1] % 256
+            img[i][j][2] = img[i][j][2] % 256
 
 
 button1 = Button(root, text="Encriptar imagen", width=20,
@@ -60,3 +87,19 @@ button1.place(x=155, y=60)
 
 root.geometry("500x300")
 root.mainloop()
+"""
+
+matriz_basica = [[[1,255,1],[2,225,2],[3,3,3]]
+                ,[[4,4,4],[5,25,5],[6,6,255]]
+                ,[[7,7,7],[8,25,28],[39,9,49]]]
+
+grill_basic = [[1,5,1],
+               [2,6,2],
+               [1,3,1]]
+print("Antes de encriptar: " , matriz_basica)
+apply_encrypt(matriz_basica, grill_basic)
+print("Despues de encriptar:", matriz_basica)
+
+apply_desencrypt(matriz_basica, grill_basic)
+print("Despues de desencriptar:", matriz_basica)
+"""
