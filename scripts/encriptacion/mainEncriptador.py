@@ -2,6 +2,7 @@ from logging import exception
 from tkinter import *
 from tkinter import filedialog as fd
 from tkinter import messagebox as mb
+from PIL import Image
 import cv2
 import numpy as np
 import encriptador
@@ -20,12 +21,17 @@ def encrypt_img():
         import_filename = fd.askopenfile()
         imagen = cv2.imread(import_filename.name)
 
+        img_save = open("imagen_LGR.lgr", 'w')
+
         tam_x = 10
         tam_y = 10
 
         grillEncrypt, inital_key = encriptador.getGrillEncryptor(tam_x, tam_y)
 
         apply_encrypt(imagen, grillEncrypt)
+
+        img_save.write(str(inital_key))
+        img_save.write(str(imagen))
 
         imagen_des = np.copy(imagen)
 
@@ -37,8 +43,22 @@ def encrypt_img():
         cv2.imshow('', result_image)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
+
+
     except exception as e:
         mb.showerror("Error", "Problema al realizar encriptacion" + e)
+        return
+
+def decrypt_img():
+
+    try:
+        import_filename = fd.askopenfile()
+        print(import_filename.name)
+        # img_save = open(import_filename.name, 'r')
+
+
+    except exception as e:
+        mb.showerror("Error", "Problema al realizar desencriptacion" + e)
         return
 
 
@@ -81,11 +101,18 @@ def apply_decrypt(img, grill):
 
 
 button1 = Button(root, text="Encriptar imagen", width=20,
-                  height=5, bg="lightblue", fg="black",
+                  height=2, bg="lightblue", fg="black",
                   font=("Helvetica", 12, "bold"),
                   command=encrypt_img)
 
 button1.place(x=155, y=60)
+
+button2 = Button(root, text="Desencriptar imagen", width=20,
+                  height=2, bg="lightblue", fg="black",
+                  font=("Helvetica", 12, "bold"),
+                  command=decrypt_img)
+
+button2.place(x=155, y=200)
 
 root.geometry("500x300")
 root.mainloop()
