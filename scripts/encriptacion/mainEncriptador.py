@@ -13,7 +13,49 @@ from tqdm import tqdm
 root = Tk()
 root.title("Encrypt Image")
 
-array_img = []
+def write_matrix(matrix):
+    matrix_array = '['
+    for i in range(len(matrix)):
+        matrix_array += '['
+        for j in range(len(matrix[0])):
+            matrix_array += str(matrix[i][j]) + " "
+        matrix_array += ']'
+    matrix_array += ']'
+
+    return matrix_array
+
+def read_matrix(matrix_string, init=0):
+    matrix = []
+    index = init
+    while index < len(matrix_string):
+        if matrix_string[index] == '[':
+            array, index = read_matrix(matrix_string, index+1)
+            matrix.append(array)
+        if matrix_string[index] == ']':
+            init = index
+            break
+        elif matrix_string[index] != ' ' and matrix_string[index] != '.':
+            matrix.append(int(matrix_string[index]))
+            if matrix_string[index+1] == '.':
+                index += 2
+        index += 1
+    return matrix, init
+
+def read_array(index, matrix_string):
+
+    array = []
+    for subindex in range(index, len(matrix_string)):
+        if matrix_string[subindex] == ']':
+            index = subindex
+            break
+        elif matrix_string[subindex] == '[':
+            subindex, subarray = read_array(subindex, matrix_string)
+            array.append(subarray)
+        elif matrix_string[subindex] != ' ' and matrix_string[subindex] != '.':
+            array.append(int(matrix_string[subindex]))
+            subindex += 2
+    return index, array
+
 
 def encrypt_img():
 
@@ -27,22 +69,26 @@ def encrypt_img():
         tam_y = 10
 
         grillEncrypt, inital_key = encriptador.getGrillEncryptor(tam_x, tam_y)
-
         apply_encrypt(imagen, grillEncrypt)
 
-        img_save.write(str(inital_key))
-        img_save.write(str(imagen))
+        img_save.write(str(inital_key.get('epocs')) + '\n')
+        img_save.write(str(inital_key.get('tam_x')) + '\n')
+        img_save.write(str(inital_key.get('tam_y')) + '\n')
 
-        imagen_des = np.copy(imagen)
+        img_save.write(write_matrix(inital_key.get('key')) + '\n')
 
-        grillDecrypt = encriptador.getGrillDecryptor(inital_key)
-        apply_decrypt(imagen_des, grillDecrypt)
+        img_save.write(write_matrix(imagen) + '\n')
 
-        result_image = np.concatenate((imagen, imagen_des), axis=1)
+        # imagen_des = np.copy(imagen)
 
-        cv2.imshow('', result_image)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        # grillDecrypt = encriptador.getGrillDecryptor(inital_key)
+        # apply_decrypt(imagen_des, grillDecrypt)
+
+        #result_image = np.concatenate((imagen, imagen_des), axis=1)
+
+        # cv2.imshow('', result_image)
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
 
 
     except exception as e:
@@ -54,12 +100,18 @@ def decrypt_img():
     try:
         import_filename = fd.askopenfile()
         print(import_filename.name)
-        # img_save = open(import_filename.name, 'r')
-
+        with open(import_filename.name, 'r') as f:
+            epocs = int(f.readline())
+            tam_x = int(f.readline())
+            tam_y = int(f.readline())
+            key, init = read_matrix(f.readline())
+            imagen, init = read_matrix(f.readline())
+        print(imagen)
 
     except exception as e:
         mb.showerror("Error", "Problema al realizar desencriptacion" + e)
         return
+
 
 
 def apply_encrypt(img, grill):
