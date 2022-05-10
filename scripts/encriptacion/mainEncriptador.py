@@ -24,6 +24,18 @@ def write_matrix(matrix):
 
     return matrix_array
 
+def read_file(name):
+    with open(name, 'r') as f:
+        epocs = int(f.readline())
+        tam_x = int(f.readline())
+        tam_y = int(f.readline())
+        key, init = read_matrix(f.readline())
+        key = key[0]
+        imagen, init = read_matrix(f.readline())
+        imagen = imagen[0]
+
+    return imagen, key
+
 def read_matrix(matrix_string, init=0):
     matrix = []
     index = init
@@ -31,31 +43,21 @@ def read_matrix(matrix_string, init=0):
         if matrix_string[index] == '[':
             array, index = read_matrix(matrix_string, index+1)
             matrix.append(array)
-        if matrix_string[index] == ']':
+        elif matrix_string[index] == ']':
             init = index
             break
-        elif matrix_string[index] != ' ' and matrix_string[index] != '.':
-            matrix.append(int(matrix_string[index]))
+        elif matrix_string[index] != ' ' and matrix_string[index] != '.' and matrix_string[index] != '\n':
+            number = ""
+            while matrix_string[index] != ' ' and matrix_string[index] != '.' and matrix_string[index] != '\n' and matrix_string[index] != ']':
+                number += matrix_string[index]
+                index += 1
+            matrix.append(int(number))
             if matrix_string[index+1] == '.':
                 index += 2
+            if matrix_string[index] == ']':
+                index -= 1
         index += 1
     return matrix, init
-
-def read_array(index, matrix_string):
-
-    array = []
-    for subindex in range(index, len(matrix_string)):
-        if matrix_string[subindex] == ']':
-            index = subindex
-            break
-        elif matrix_string[subindex] == '[':
-            subindex, subarray = read_array(subindex, matrix_string)
-            array.append(subarray)
-        elif matrix_string[subindex] != ' ' and matrix_string[subindex] != '.':
-            array.append(int(matrix_string[subindex]))
-            subindex += 2
-    return index, array
-
 
 def encrypt_img():
 
@@ -99,14 +101,14 @@ def decrypt_img():
 
     try:
         import_filename = fd.askopenfile()
-        print(import_filename.name)
-        with open(import_filename.name, 'r') as f:
-            epocs = int(f.readline())
-            tam_x = int(f.readline())
-            tam_y = int(f.readline())
-            key, init = read_matrix(f.readline())
-            imagen, init = read_matrix(f.readline())
-        print(imagen)
+        imagen, key = read_file(import_filename.name)
+        imagen = np.array(imagen).astype(np.uint8)
+
+        cv2.imshow('', imagen)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+        # print(key)
+        # print(imagen)
 
     except exception as e:
         mb.showerror("Error", "Problema al realizar desencriptacion" + e)
