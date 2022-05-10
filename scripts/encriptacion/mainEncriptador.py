@@ -13,52 +13,6 @@ from tqdm import tqdm
 root = Tk()
 root.title("Encrypt Image")
 
-def write_matrix(matrix):
-    matrix_array = '['
-    for i in range(len(matrix)):
-        matrix_array += '['
-        for j in range(len(matrix[0])):
-            matrix_array += str(matrix[i][j]) + " "
-        matrix_array += ']'
-    matrix_array += ']'
-
-    return matrix_array
-
-def read_file(name):
-    with open(name, 'r') as f:
-        epocs = int(f.readline())
-        tam_x = int(f.readline())
-        tam_y = int(f.readline())
-        key, init = read_matrix(f.readline())
-        key = key[0]
-        imagen, init = read_matrix(f.readline())
-        imagen = imagen[0]
-
-    return imagen, key
-
-def read_matrix(matrix_string, init=0):
-    matrix = []
-    index = init
-    while index < len(matrix_string):
-        if matrix_string[index] == '[':
-            array, index = read_matrix(matrix_string, index+1)
-            matrix.append(array)
-        elif matrix_string[index] == ']':
-            init = index
-            break
-        elif matrix_string[index] != ' ' and matrix_string[index] != '.' and matrix_string[index] != '\n':
-            number = ""
-            while matrix_string[index] != ' ' and matrix_string[index] != '.' and matrix_string[index] != '\n' and matrix_string[index] != ']':
-                number += matrix_string[index]
-                index += 1
-            matrix.append(int(number))
-            if matrix_string[index+1] == '.':
-                index += 2
-            if matrix_string[index] == ']':
-                index -= 1
-        index += 1
-    return matrix, init
-
 def encrypt_img():
 
     try:
@@ -83,38 +37,90 @@ def encrypt_img():
 
         # imagen_des = np.copy(imagen)
 
-        # grillDecrypt = encriptador.getGrillDecryptor(inital_key)
-        # apply_decrypt(imagen_des, grillDecrypt)
+        #grillDecrypt = encriptador.getGrillDecryptor(inital_key)
+        #apply_decrypt(imagen_des, grillDecrypt)
 
         #result_image = np.concatenate((imagen, imagen_des), axis=1)
 
-        # cv2.imshow('', result_image)
-        # cv2.waitKey(0)
-        # cv2.destroyAllWindows()
+        #cv2.imshow('', result_image)
+        #cv2.waitKey(0)
+        #cv2.destroyAllWindows()
 
 
     except exception as e:
         mb.showerror("Error", "Problema al realizar encriptacion" + e)
         return
 
+def write_matrix(matrix):
+    matrix_array = '['
+    for i in range(len(matrix)):
+        matrix_array += '['
+        for j in range(len(matrix[0])):
+            matrix_array += str(matrix[i][j]) + " "
+        matrix_array += ']'
+    matrix_array += ']'
+
+    return matrix_array
+
 def decrypt_img():
 
     try:
         import_filename = fd.askopenfile()
-        imagen, key = read_file(import_filename.name)
-        imagen = np.array(imagen).astype(np.uint8)
+        imagen, inital_key = read_file(import_filename.name)
+        inital_grill = encriptador.getGrillDecryptor(inital_key)
+
+        imagen = imagen.astype(np.uint8)
+        apply_decrypt(imagen, inital_grill)
 
         cv2.imshow('', imagen)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
-        # print(key)
-        # print(imagen)
+
 
     except exception as e:
         mb.showerror("Error", "Problema al realizar desencriptacion" + e)
         return
 
 
+def read_file(name):
+    with open(name, 'r') as f:
+        epocs = int(f.readline())
+        tam_x = int(f.readline())
+        tam_y = int(f.readline())
+        key, init = read_matrix(f.readline())
+        imagen, init = read_matrix(f.readline())
+
+    inital_key = {
+        'epocs': epocs,
+        'tam_x': tam_x,
+        'tam_y': tam_y,
+        'key': np.array(key[0])
+    }
+
+    return np.array(imagen[0]), inital_key
+
+def read_matrix(matrix_string, init=0):
+    matrix = []
+    index = init
+    while index < len(matrix_string):
+        if matrix_string[index] == '[':
+            array, index = read_matrix(matrix_string, index+1)
+            matrix.append(array)
+        elif matrix_string[index] == ']':
+            init = index
+            break
+        elif matrix_string[index] != ' ' and matrix_string[index] != '.' and matrix_string[index] != '\n':
+            number = ""
+            while matrix_string[index] != ' ' and matrix_string[index] != '.' and matrix_string[index] != '\n' and matrix_string[index] != ']':
+                number += matrix_string[index]
+                index += 1
+            matrix.append(int(number))
+            if matrix_string[index] == '.':
+                index += 1
+            if matrix_string[index] == ']':
+                index -= 1
+        index += 1
+    return matrix, init
 
 def apply_encrypt(img, grill):
 
@@ -152,6 +158,8 @@ def apply_decrypt(img, grill):
             img[i][j][0] = img[i][j][0] % 256
             img[i][j][1] = img[i][j][1] % 256
             img[i][j][2] = img[i][j][2] % 256
+
+    return img
 
 
 button1 = Button(root, text="Encriptar imagen", width=20,
