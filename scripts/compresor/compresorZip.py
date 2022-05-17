@@ -52,6 +52,8 @@ def unzipNavigate():
     window.unzipEntry.insert("1.0", "Archivos a descomprimir:\n")
 
     window.files = os.path.basename(window.fileList)
+    # Ponemos por defecto que se establezca el mismo nombre de archivo
+    window.unzipNameEntry.insert(0, window.files.replace(".zip", ""))
     window.unzipEntry.insert("2.0", window.files + "\n")
 
     window.unzipEntry.config(state=DISABLED)
@@ -79,6 +81,12 @@ def zipNavigate():
     window.zipEntry.insert("1.0", "Archivos a comprimir:\n")
 
     window.files = os.path.basename(window.fileList)
+    # Eliminamos la extension del archivo
+    fileNameWithoutExtension = window.files.split(".")[0]
+    # Ponemos por defecto que se establezca el mismo nombre de archivo
+
+    window.zipNameEntry.insert(0, fileNameWithoutExtension)
+
     window.zipEntry.insert("2.0", window.files + "\n")
 
     window.zipEntry.config(state=DISABLED)
