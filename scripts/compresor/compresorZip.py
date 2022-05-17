@@ -58,20 +58,20 @@ def unzipNavigate():
 
 def unzipArch():
 
-    #try:
+    try:
 
-    dirName = filedialog.askdirectory()
-    os.makedirs(dirName+"\\"+window.unzipNameEntry.get())
+        dirName = filedialog.askdirectory()
+        os.makedirs(dirName+"\\"+window.unzipNameEntry.get())
 
-    # Abrimos y extraemos el archivo
-    with zipfile.ZipFile(window.fileList, 'r') as zip:
-        zipFile = zipfile.ZipFile(window.fileList)
-        zipFile.extractall(dirName+"\\"+window.unzipNameEntry.get())
+        # Abrimos y extraemos el archivo
+        with zipfile.ZipFile(window.fileList, 'r') as zip:
+            zipFile = zipfile.ZipFile(window.fileList)
+            zipFile.extractall(dirName+"\\"+window.unzipNameEntry.get())
 
-    messagebox.showinfo("Descomprimir", "Archivo descomprimido con éxito")
+        messagebox.showinfo("Descomprimir", "Archivo descomprimido con éxito")
 
-    #except:
-    #    messagebox.showerror("Descomprimir", "Error al descomprimir")
+    except:
+        messagebox.showerror("Descomprimir", "Error al descomprimir")
 
 
 def zipNavigate():
@@ -84,16 +84,17 @@ def zipNavigate():
     window.zipEntry.config(state=DISABLED)
 
 def zipArch():
-    try:
+    #try:
 
-        fileZip = zipfile.ZipFile(window.fileList + ".zip", 'w')
+    dirName = filedialog.askdirectory()
+    fileZip = zipfile.ZipFile(dirName + "\\" + window.zipNameEntry.get() + ".zip", 'w')
 
-        fileZip.write(window.fileList, window.zipNameEntry.get(), compress_type=zipfile.ZIP_DEFLATED)
-        fileZip.close()
-        messagebox.showinfo("Comprimir", "Archivo comprimido con éxito")
+    fileZip.write(window.fileList, window.files, compress_type=zipfile.ZIP_DEFLATED)
+    fileZip.close()
+    messagebox.showinfo("Comprimir", "Archivo comprimido con éxito")
 
-    except:
-        messagebox.showerror("Comprimir", "Error al comprimir")
+    #except:
+    #    messagebox.showerror("Comprimir", "Error al comprimir")
 
 
 window = tk.Tk()
